@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Electricity Bill Analyzer</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f6f8;
+      display: flex;
+      justify-content: center;
+      padding: 40px;
+    }
+
+    .container {
+      background: white;
+      padding: 25px;
+      border-radius: 10px;
+      width: 400px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+
+    h2 {
+      text-align: center;
+    }
+
+    label {
+      display: block;
+      margin-top: 12px;
+      font-weight: bold;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 8px;
+      margin-top: 5px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+
+    button {
+      margin-top: 15px;
+      width: 100%;
+      padding: 10px;
+      background: #007bff;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #0056b3;
+    }
+
+    .result {
+      margin-top: 15px;
+      font-weight: bold;
+      color: green;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <h2>Electricity Bill Analyzer</h2>
+
+  <label>Current Reading</label>
+  <input type="number" id="currentReading">
+
+  <label>Previous Reading</label>
+  <input type="number" id="previousReading">
+
+  <label>Last Reading Date</label>
+  <input type="date" id="lastDate">
+
+  <label>Current Reading Date</label>
+  <input type="date" id="currentDate">
+
+  <label>Consumption Type</label>
+  <select id="consumptionType">
+    <option value="DS-2">DS-2</option>
+    <option value="DS-1">DS-1</option>
+    <option value="Commercial">Commercial</option>
+  </select>
+
+  <label>Sanction Load (kW)</label>
+  <input type="number" id="sanctionLoad">
+
+  <label>Demand Load (kW)</label>
+  <input type="number" id="demandLoad">
+
+  <button onclick="calculate()">Calculate Consumption</button>
+
+  <div class="result" id="result"></div>
+</div>
+
+<script>
+  function formatMoney(value) {
+      return Number(value).toFixed(2);
+  } 
+   
+function calculate() {
+    
+    let current = parseFloat(document.getElementById("currentReading").value);
+    let previous = parseFloat(document.getElementById("previousReading").value);
+    if (isNaN(current) || isNaN(previous) || current < previous) {
+      alert("Invalid meter readings");
+      return;
+    }
+    let consumption = current - previous;
+
+    // date calculation
+    let lastDate = new Date(document.getElementById("lastDate").value);
+    let currentDate = new Date(document.getElementById("currentDate").value);
+
+    let diffDays = Math.ceil((currentDate - lastDate) / (1000 * 60 * 60 * 24)) + 1;
+
+    
+    let totalUnit= current - previous;
+    let freeUnits = Math.round((diffDays/ 30) * 125);
+    let subsidizedUnits=0;
+    {
+      if(totalUnit<freeUnits){
+        subsidizedUnits=0;
+      }
+      else{
+        subsidizedUnits=totalUnit-freeUnits;
+      }
+    }
+    
+  
+    let actualFreeUnits = Math.min(freeUnits, totalUnit);
+    let sanctionLoad = parseFloat(document.getElementById("sanctionLoad").value);
+    let demandLoad = parseFloat(document.getElementById("demandLoad").value);
+    let billingDemand = Math.max(sanctionLoad, Math.ceil(demandLoad));
+    
+    // 2. Define Rate (DS-2 Standard Rate is ₹80/kW/month)
+    const ratePerKW = 80;
+
+    // 3. Normal Demand Charge (Pro-rated for billing days)
+    let demandCharge = (billingDemand * ratePerKW / 30) * diffDays;
+
+    // 4. Excess Demand Penalty 
+    // Penalty is applied if Demand Load > Sanction Load
+    let excessKW = 0;
+    let excessDemandCharge = 0;
+    
+    if (billingDemand > sanctionLoad) {
+        excessKW = billingDemand - sanctionLoad;
+        // The penalty is the normal rate charged a second time for the extra kW
+        excessDemandCharge = (excessKW * ratePerKW / 30) * diffDays;
+    }
+    let electricityCharge=totalUnit*7.42;
+    
+    let electricityDuty = (electricityCharge*6)/100;
+    let freeUnitsSubsidy = actualFreeUnits * 7.42 + (6 * (actualFreeUnits * 7.42)) / 100;
+    let stateSubsidy= subsidizedUnits*3.30;
+    let subsidy = freeUnitsSubsidy + stateSubsidy;
+    
+    
+    let finalCharge = electricityCharge - subsidy;
+    let total = finalCharge + demandCharge + electricityDuty + excessDemandCharge;
+    electricityDuty = Number(electricityDuty.toFixed(2));
+    finalCharge = Number(finalCharge.toFixed(2));
+    total = Number(total.toFixed(2));
+    demandCharge = Number(demandCharge.toFixed(2));
+    excessDemandCharge = Number(excessDemandCharge.toFixed(2));
+    electricityCharge = Number(electricityCharge.toFixed(2));
+    subsidy = Number(subsidy.toFixed(2));
+
+    // store data
+    let newBill = {
+      date: currentDate.toISOString().split("T")[0],
+      days: diffDays,
+      units: consumption,
+      freeUnits: freeUnits,
+      subsidizedUnits: subsidizedUnits,
+      charge: electricityCharge,
+      demandCharge: demandCharge,
+      excessDemandCharge: excessDemandCharge,
+      duty: electricityDuty,
+      subsidy: subsidy,
+      finalCharge: finalCharge,
+      total: total
+    };
+
+    // get old data
+    let history = JSON.parse(localStorage.getItem("billHistory")) || [];
+
+    // add new bill
+    history.push(newBill);
+
+    // save both
+    localStorage.setItem("billHistory", JSON.stringify(history));
+    localStorage.setItem("billData", JSON.stringify(newBill));
+
+  
+
+
+    // redirect to new page
+    window.location.href = "result.html";
+
+    console.log("DEBUG:", {
+        diffDays,
+        totalUnit,
+        freeUnits,
+        excessDemandCharge
+    });
+}
+</script>
+
+</body>
+</html>
