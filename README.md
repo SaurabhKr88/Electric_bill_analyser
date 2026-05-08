@@ -63,7 +63,7 @@ This improves billing transparency and user understanding.
 
 | Category               | Technologies          |
 | ---------------------- | --------------------- |
-| Frontend               | HTML, CSS, JavaScript |
+| Frontend               | HTML , JavaScript |
 | Containerization       | Docker                |
 | Cloud Platform         | AWS EC2               |
 | Infrastructure as Code | Terraform             |
@@ -166,13 +166,9 @@ Electricity-Bill-Analyzer/
 ├── app/
 │   ├── index.html
 │   ├── result.html
-│   ├── style.css
-│   ├── script.js
-│   └── assets/
 │
 ├── docker/
 │   ├── Dockerfile
-│   └── nginx.conf
 │
 ├── terraform/
 │   ├── main.tf
@@ -287,7 +283,7 @@ The platform models actual electricity billing concepts such as:
 
 | Domain                    | Skills                   |
 | ------------------------- | ------------------------ |
-| Frontend Development      | HTML, CSS, JavaScript    |
+| Frontend Development      | HTML, JavaScript    |
 | Cloud Engineering         | AWS EC2                  |
 | DevOps                    | Docker, GitHub Actions   |
 | Infrastructure Automation | Terraform                |
@@ -324,10 +320,4 @@ This project demonstrates the ability to:
 
 # Author
 
-Your Name
-
----
-
-# License
-
-This project is licensed under the MIT License.
+Saurabh Kumar
