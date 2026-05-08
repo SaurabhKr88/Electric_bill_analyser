@@ -180,7 +180,7 @@ Electricity-Bill-Analyzer/
 ## Clone Repository
 
 ```bash
-git clone <your-repository-url>
+git clone <https://github.com/SaurabhKr88/Electric_bill_analyser>
 cd Electricity-Bill-Analyzer
 ```
 
