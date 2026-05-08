@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Bill Result</title>
+
+<style>
+body {
+  font-family: Arial;
+  background: #f4f6f8;
+  padding: 30px;
+}
+
+.box {
+  background: white;
+  padding: 25px;
+  border-radius: 12px;
+  max-width: 500px;
+  margin: auto;
+  box-shadow: 0 6px 15px rgba(0,0,0,0.1);
+}
+
+h2 {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.section {
+  margin-top: 15px;
+  padding-top: 10px;
+  border-top: 1px solid #ddd;
+}
+
+.row {
+  display: flex;
+  justify-content: space-between;
+  margin: 6px 0;
+}
+
+.label {
+  color: #555;
+}
+
+.value {
+  font-weight: bold;
+}
+
+.total {
+  font-size: 22px;
+  font-weight: bold;
+  color: #007bff;
+}
+</style>
+</head>
+
+<body>
+
+<div class="box">
+  <h2>⚡ Electricity Bill</h2>
+
+  <div class="section">
+    <div class="row"><span class="label">Billed Days</span><span id="days" class="value"></span></div>
+    <div class="row"><span class="label">Units</span><span id="units" class="value"></span></div>
+    <div class="row"><span class="label">Free Units</span><span id="freeUnits" class="value"></span></div>
+    <div class="row"><span class="label">Subsidized Units</span><span id="subUnits" class="value"></span></div>
+  </div>
+
+  <div class="section">
+    <div class="row"><span class="label">Electricity Charge</span><span id="charge" class="value"></span></div>
+    <div class="row"><span class="label">Demand Charge</span><span id="demand" class="value"></span></div>
+    <div class="row"><span class="label">Excess Demand</span><span id="excess" class="value"></span></div>
+    <div class="row"><span class="label">Electricity Duty</span><span id="duty" class="value"></span></div>
+    <div class="row"><span class="label">Subsidy</span><span id="subsidy" class="value"></span></div>
+    <p id="comparison" style="font-weight:bold; margin-top:10px;"></p>
+  </div>
+
+  <div class="section">
+    <div class="row total">
+      <span>Total Amount</span>
+      <span id="total"></span>
+    </div>
+  </div>
+</div>
+
+<script>
+  let data = JSON.parse(localStorage.getItem("billData"));
+
+  if (!data) {
+    alert("No bill data found. Please calculate first.");
+    window.location.href = "index.html";
+  }
+
+  let history = JSON.parse(localStorage.getItem("billHistory")) || [];
+
+  let previous = null;
+  if (history.length > 1) {
+      previous = history[history.length - 2];
+  }
+
+  function formatCurrency(value) {
+    return "₹" + Number(value).toLocaleString('en-IN', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    });
+  }
+
+  document.getElementById("days").innerText = data.days;
+  document.getElementById("units").innerText = data.units;
+  document.getElementById("freeUnits").innerText = data.freeUnits;
+  document.getElementById("subUnits").innerText = data.subsidizedUnits;
+
+  document.getElementById("charge").innerText = formatCurrency(data.charge);
+  document.getElementById("demand").innerText = formatCurrency(data.demandCharge);
+  document.getElementById("excess").innerText = formatCurrency(data.excessDemandCharge);
+  document.getElementById("duty").innerText = formatCurrency(data.duty);
+  document.getElementById("subsidy").innerText = formatCurrency(data.subsidy);
+
+  document.getElementById("total").innerText = formatCurrency(data.total);
+
+  if (previous) {
+      let diff = data.total - previous.total;
+      let percent = (diff / previous.total) * 100;
+
+      let el = document.getElementById("comparison");
+
+      el.innerText =
+          "Change from last bill: ₹" + diff.toFixed(2) +
+          " (" + percent.toFixed(2) + "%)";
+
+      // color indicator
+      if (diff > 0) {
+          el.style.color = "red";
+      } else {
+          el.style.color = "green";
+      }
+  }
+</script>
+
+</body>
+</html>
