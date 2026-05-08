@@ -166,29 +166,11 @@ Electricity-Bill-Analyzer/
 ├── app/
 │   ├── index.html
 │   ├── result.html
-│
 ├── docker/
-│   ├── Dockerfile
-│
+│   └── Dockerfile
 ├── terraform/
-│   ├── main.tf
-│   ├── variables.tf
-│   ├── outputs.tf
-│   ├── provider.tf
-│   └── terraform.tfvars.example
-│
-├── .github/
-│   └── workflows/
-│       └── deploy.yml
-│
-├── screenshots/
-│   ├── home.png
-│   ├── results.png
-│   └── architecture.png
-│
-├── README.md
-├── .gitignore
-└── LICENSE
+│   └── main.tf
+└──  README.md
 ```
 
 ---
